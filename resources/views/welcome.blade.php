@@ -6,47 +6,54 @@
             <div class="w-full">
                 <h1 class="font-thin text-grey-dark mb-8 mt-6 text-center">
                     {{ __('Art by ') }}
-                    <a href="http://martindilling.com" class="no-underline hover:underline cursor-default font-thin text-grey-dark">
+                    <a href="http://martindilling.com"
+                       class="no-underline hover:underline cursor-default font-thin text-grey-dark">
                         Martin Dilling-Hansen
                     </a>
                 </h1>
 
-                <div class="bg-grey-light px-4 py-12">
-                    <div class="container mx-auto flex flex-wrap">
-                        <div class="w-1/2 pr-5">
+                <div class="block lg:flex flex-wrap justify-center">
+                    <div class="w-full lg:w-1/2 bg-grey-light pl-4 lg:pl-24 pr-4 py-12">
+                        <div class="w-full lg:pr-5">
                             <div class="gumroad-product-embed flex justify-center items-center"
                                  data-gumroad-product-id="mdh_simple-symmetry">
                                 <a href="https://gumroad.com/l/mdh_simple-symmetry">
-                                    <img src="{{ asset('images/simple-symmetry_01.jpg') }}" alt="Simple Symmetry">
+                                    <img src="{{ asset('images/simple-symmetry_preview.jpg') }}" alt="Simple Symmetry">
                                 </a>
                             </div>
                         </div>
-                        <div class="w-1/2 pl-5">
+                    </div>
+
+                    <div class="w-full lg:w-1/2 bg-grey-lighter lg:bg-grey-light pl-4 pr-4 lg:pr-24 py-12">
+                        <div class="w-full lg:pl-5">
                             <div class="gumroad-product-embed flex justify-center items-center"
                                  data-gumroad-product-id="mdh_invasion">
                                 <a href="https://gumroad.com/l/mdh_invasion">
-                                    <img src="{{ asset('images/invasion_01.jpg') }}" alt="Invasion">
+                                    <img src="{{ asset('images/invasion_preview.jpg') }}" alt="Invasion">
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-grey-lighter px-4 py-12">
-                    <div class="container mx-auto flex flex-wrap">
-                        <div class="w-1/2 pr-5">
+                <div class="block lg:flex flex-wrap justify-center">
+                    <div class="w-full lg:w-1/2 bg-grey-light lg:bg-grey-lighter pl-4 lg:pl-24 pr-4 py-12">
+                        <div class="w-full lg:pr-5">
                             <div class="gumroad-product-embed flex justify-center items-center"
                                  data-gumroad-product-id="mdh_crossover">
                                 <a href="https://gumroad.com/l/mdh_crossover">
-                                    <img src="{{ asset('images/crossover_01.jpg') }}" alt="Crossover">
+                                    <img src="{{ asset('images/crossover_preview.jpg') }}" alt="Crossover">
                                 </a>
                             </div>
                         </div>
-                        <div class="w-1/2 pl-5">
+                    </div>
+
+                    <div class="w-full lg:w-1/2 bg-grey-lighter pl-4 pr-4 lg:pr-24 py-12">
+                        <div class="w-full lg:pl-5">
                             <div class="gumroad-product-embed flex justify-center items-center"
                                  data-gumroad-product-id="mdh_holes">
                                 <a href="https://gumroad.com/l/mdh_holes">
-                                    <img src="{{ asset('images/holes_01.jpg') }}" alt="Holes">
+                                    <img src="{{ asset('images/holes_preview.jpg') }}" alt="Holes">
                                 </a>
                             </div>
                         </div>

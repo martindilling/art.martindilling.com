@@ -10,7 +10,7 @@
     {{--<script src="{{ mix('js/app.js') }}" defer></script>--}}
     <link href="{{ mix('css/app.css') }}" rel="stylesheet">
 </head>
-<body class="flex h-screen font-sans antialiased text-black leading-tight bg-grey-lighter">
+<body class="flex h-full font-sans antialiased text-black leading-tight bg-grey-lighter">
 <div id="app" class="flex-1 block md:flex flex-col">
     {{--<nav class="flex items-center justify-between flex-wrap shadow-md bg-teal px-2 py-4">--}}
         {{--<a href="#" class="flex items-center flex-no-shrink text-white no-underline mr-4 px-2 rounded focus:outline-none focus:shadow-outline">--}}
@@ -60,7 +60,7 @@
     <div class="flex-1 flex flex-col pb-4">
         @yield('body')
     </div>
-    <div class="fixed pin-b pin-r mr-3 mb-3 text-xs text-grey">
+    <div class="mb-6 text-xs text-grey text-center">
         &copy; {{ date('Y') }} {{ config('app.name', 'Laravel') }}
     </div>
 </div>
