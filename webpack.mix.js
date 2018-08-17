@@ -22,6 +22,8 @@ mix.js('resources/assets/js/app.js', 'public/js')
     })
     .purgeCss();
 
+mix.copyDirectory('resources/assets/images', 'public/i');
+
 if (mix.inProduction()) {
     mix.version();
 }

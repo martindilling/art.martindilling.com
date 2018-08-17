@@ -12,7 +12,8 @@
         "fideloper/proxy": "^4.0",
         "laravel/framework": "5.6.*",
         "laravel/tinker": "^1.0",
-        "scripturadesign/tailwindcss-laravel-preset": "^1.0"
+        "scripturadesign/tailwindcss-laravel-preset": "^1.0",
+        "stripe/stripe-php": "^6.15"
     },
     "require-dev": {
         "filp/whoops": "^2.0",
