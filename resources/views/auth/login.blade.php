@@ -55,19 +55,19 @@
                 <button type="submit" class="btn custom-outline">
                     {{ __('Login') }}
                 </button>
-                <a href="{{ route('password.request') }}" class="no-underline inline-block align-baseline text-sm text-blue hover:text-blue-dark float-right rounded custom-outline">
-                    {{ __('Forgot Password?') }}
-                </a>
+                {{--<a href="{{ route('password.request') }}" class="no-underline inline-block align-baseline text-sm text-blue hover:text-blue-dark float-right rounded custom-outline">--}}
+                    {{--{{ __('Forgot Password?') }}--}}
+                {{--</a>--}}
             </div>
         @endslot
 
         @slot('footer')
-            <p class="text-grey-dark text-sm">
-                {{ __('Don\'t have an account?') }}
-                <a href="{{ route('register') }}" class="no-underline text-blue rounded custom-outline">
-                    {{ __('Create an Account') }}
-                </a>.
-            </p>
+            {{--<p class="text-grey-dark text-sm">--}}
+                {{--{{ __('Don\'t have an account?') }}--}}
+                {{--<a href="{{ route('register') }}" class="no-underline text-blue rounded custom-outline">--}}
+                    {{--{{ __('Create an Account') }}--}}
+                {{--</a>.--}}
+            {{--</p>--}}
         @endslot
     @endcomponent
 @endsection

@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Exceptions\CheckoutFailed;
-use Stripe\Order;
+use App\Http\Controllers\Controller;
+use App\Order;
+use Illuminate\Support\Collection;
+use Stripe\Charge;
+use Stripe\Order as StripeOrder;
 use Stripe\SKU;
-use App\Product;
-use Stripe\Product as StripeProduct;
 
-class ProductsController extends Controller
+class OrdersController extends Controller
 {
     /**
      * Show the application dashboard.
@@ -18,27 +20,73 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        $skus = collect(SKU::all([
-            'active' => true,
-        ])->data);
+        $stripeOrders = collect(StripeOrder::all([])->data);
 
-        $stripeProducts = collect(StripeProduct::all([
-            'ids' => $skus->pluck('product')->all(),
-        ])->data);
-
-        $products = $skus->map(function (SKU $sku) use ($stripeProducts) {
-            return Product::fromStripe(
-                $sku,
-                $stripeProducts->where('id', $sku->product)->first()
-            );
+        $orders = $stripeOrders->map(function (StripeOrder $order) {
+            return Order::fromStripe($order);
         });
 
-        $products = $products->sortByDesc('stock');
+        $skuIds = $orders->reduce(function (Collection $collection, Order $order) {
+            return $collection->merge($order->skuItems()->pluck('parent'));
+        }, collect())->unique();
 
-//        dump($skus, $stripeProducts);
-//        dd($products);
 
-        return view('products.index', ['products' => $products]);
+        $skus = collect(SKU::all([
+            'ids' => $skuIds->toArray(),
+        ])->data)->keyBy('id');
+
+//        dd($skus);
+
+        $order = ['created', 'paid', 'fulfilled', 'returned', 'canceled'];
+        $orders = $orders->sort(function (Order $a, Order $b) use ($order) {
+            $pos_a = array_search($a->status, $order);
+            $pos_b = array_search($b->status, $order);
+            return $pos_a - $pos_b;
+        });
+        $orders = $orders->groupBy('status');
+
+//        dump($stripeOrders);
+//        dd($orders);
+
+        return view('admin.orders.index', ['orders' => $orders, 'skus' => $skus]);
+    }
+
+    public function markShipped(string $id)
+    {
+        /** @var StripeOrder $stripeOrder */
+        $stripeOrder = StripeOrder::retrieve($id);
+        $order = Order::fromStripe($stripeOrder);
+
+        /** @var Charge $charge */
+        $charge = Charge::create(array(
+            "amount" => $order->amount,
+            "currency" => $order->currency,
+            "customer" => $order->customer,
+//            "capture" => false,
+            "shipping" => $order->shipping->jsonSerialize(),
+            "order" => $order->id,
+            "description" => 'Payment for ' . $order->skuItems()->pluck('description')->implode(', ')
+        ));
+
+        StripeOrder::update($id, ['charge' => $charge->id]);
+        StripeOrder::update($id, ['status' => 'paid']);
+
+        return back();
+
+        dump('markShipped');
+        dump($charge);
+        dd($stripeOrder);
+    }
+
+    public function markFulfilled(string $id)
+    {
+        /** @var StripeOrder $stripeOrder */
+        StripeOrder::update($id, ['status' => 'fulfilled']);
+
+        return back();
+
+        dump('markFulfilled');
+        dd($stripeOrder);
     }
 
     /**
@@ -65,7 +113,7 @@ class ProductsController extends Controller
 //        dump($sku, $stripeProduct);
 //        dd($product);
 
-        return view('products.show', ['product' => $product]);
+        return view('admin.products.show', ['product' => $product]);
     }
 
     /**
@@ -89,7 +137,8 @@ class ProductsController extends Controller
             'product' => $stripeProduct->id,
         ])->data)->first();
 
-        $customerData = [
+        /** @var \Stripe\Customer $customer */
+        $customer = \Stripe\Customer::create([
             'email' => request('stripeEmail'),
             'source' => request('stripeToken'),
             'shipping' =>  [
@@ -102,16 +151,7 @@ class ProductsController extends Controller
                     'country' => request('stripeShippingAddressCountryCode'),
                 ],
             ],
-        ];
-
-        /** @var \Stripe\Customer $customer */
-        $customer = \Stripe\Customer::all(['limit' => 1, 'email' => $customerData['email']])->data[0] ?? null;
-
-        if ($customer) {
-            $customer = \Stripe\Customer::update($customer->id, $customerData);
-        } else {
-            $customer = \Stripe\Customer::create($customerData);
-        }
+        ]);
 
         /** @var Order $order */
         $order = Order::create([
@@ -151,6 +191,6 @@ class ProductsController extends Controller
 //        dump($sku, $stripeProduct);
 //        dd($product);
 
-        return view('products.show', ['product' => $product]);
+        return view('admin.products.show', ['product' => $product]);
     }
 }

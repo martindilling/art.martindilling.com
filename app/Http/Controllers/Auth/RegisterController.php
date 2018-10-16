@@ -24,11 +24,14 @@ class RegisterController extends Controller
     use RegistersUsers;
 
     /**
-     * Where to redirect users after registration.
+     * Where to redirect users after login.
      *
-     * @var string
+     * @return string
      */
-    protected $redirectTo = '/home';
+    protected function redirectTo() : string
+    {
+        return route('admin.orders.index');
+    }
 
     /**
      * Create a new controller instance.

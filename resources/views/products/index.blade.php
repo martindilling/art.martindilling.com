@@ -11,7 +11,7 @@
             <div class="w-full">
                 <h1 class="text-2xl text-indigo-darker font-bold my-10 text-center">
                     <a href="{{ route('products.index') }}"
-                       class="no-underline hover:underline cursor-default text-indigo-darker">
+                       class="no-underline hover:underline text-indigo-darker">
                         {{ __('Art by ') }}Martin Dilling-Hansen
                     </a>
                 </h1>
@@ -42,7 +42,9 @@
                             </a>
                         </div>
                     @empty
-                        Empty
+                        <div class="w-full py-32 cursor-default text-3xl text-center text-grey">
+                            No products found
+                        </div>
                     @endforelse
                 </div>
 
