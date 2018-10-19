@@ -11,7 +11,7 @@
             <div class="w-full">
                 <div class="container mx-auto flex flex-wrap justify-center">
                     <div class="w-full md:w-3/4 px-4 mb-8">
-                        <form action="{{ route('admin.products.store') }}" method="post" enctype="multipart/form-data">
+                        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="mb-4">
                                 <label class="block text-grey-darker text-sm font-bold mb-2" for="slug">

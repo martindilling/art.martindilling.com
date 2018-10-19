@@ -63,7 +63,7 @@ class Stripe
         /** @var StripeProduct $stripeProduct */
         $stripeProduct = array_first(StripeProduct::all(['active' => true, 'url' => $slug])->data);
         /** @var StripeSKU $stripeSku */
-        $stripeSku = array_first(StripeSKU::all(['active' => true, 'product' => $stripeProduct->id])->data);
+        $stripeSku = array_first(StripeSKU::all(['active' => true, 'product' => $stripeProduct ? $stripeProduct->id : ''])->data);
 
         return $this->buildProductFrom($stripeProduct, $stripeSku);
     }

@@ -67,7 +67,7 @@ class ProductsController extends Controller
     {
         $images = new Images();
         /** @var \Illuminate\Http\UploadedFile $image */
-        foreach (request()->file('images') as $key => $image) {
+        foreach (request()->file('images', []) as $key => $image) {
             $path = Storage::putFileAs(
                 'public/' . request('slug'),
                 $image,
