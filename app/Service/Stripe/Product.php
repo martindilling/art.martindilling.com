@@ -48,15 +48,82 @@ class Product implements Arrayable
         $this->name = $name;
     }
 
-    public function id() : string
+    public function id() : ?string
     {
         return $this->id;
     }
 
-    public function sku() : Sku
+    public function isActive() : bool
+    {
+        return $this->active;
+    }
+
+    public function name() : string
+    {
+        return $this->name;
+    }
+
+    public function caption() : ?string
+    {
+        return $this->caption;
+    }
+
+    public function description() : ?string
+    {
+        return $this->description;
+    }
+
+    public function images() : ?Images
+    {
+        return $this->images;
+    }
+
+    public function packageDimensions() : ?PackageDimensions
+    {
+        return $this->packageDimensions;
+    }
+
+    public function url() : ?string
+    {
+        return $this->url;
+    }
+
+    public function created() : ?Carbon
+    {
+        return $this->created;
+    }
+
+    public function sku() : ?Sku
     {
         return $this->sku;
     }
+
+
+    public function slug() : string
+    {
+        $url = str_replace('__removeme__', '', route('products.show', ['slug' => '__removeme__']));
+
+        return str_replace($url, '', $this->url);
+    }
+
+    public function cover() : string
+    {
+        return $this->sku()->image();
+    }
+
+    public function isSold() : bool
+    {
+        return $this->sku()->stock() === 0;
+    }
+
+    public function formattedPrice() : string
+    {
+        $price = number_format($this->sku()->price() / 100, 2, ',', '.') . ' kr.';
+        $price = str_replace(',00', '', $price);
+
+        return $price;
+    }
+
 
     public function setId(?string $id) : void
     {
@@ -116,16 +183,32 @@ class Product implements Arrayable
     public function toArray() : array
     {
         return array_filter([
-//            'id' => $this->id,
             'active' => $this->active,
             'name' => $this->name,
-//            'type' => $this->type,
             'caption' => $this->caption,
             'description' => $this->description,
             'images' => $this->images ? $this->images->toArray() : null,
             'package_dimensions' => $this->packageDimensions ? $this->packageDimensions->toArray() : null,
             'url' => $this->url,
-//            'created' => $this->created ? (int) $this->created->format('U') : null,
+        ], function ($value) { return $value !== null; });
+    }
+
+    /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
+    public function toCreateArray() : array
+    {
+        return array_filter([
+            'active' => $this->active,
+            'name' => $this->name,
+            'type' => $this->type,
+            'caption' => $this->caption,
+            'description' => $this->description,
+            'images' => $this->images ? $this->images->toArray() : null,
+            'package_dimensions' => $this->packageDimensions ? $this->packageDimensions->toArray() : null,
+            'url' => $this->url,
         ], function ($value) { return $value !== null; });
     }
 }

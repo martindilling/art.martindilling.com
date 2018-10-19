@@ -3,68 +3,56 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Service\Stripe\Images;
+use App\Service\Stripe\PackageDimensions;
+use App\Service\Stripe\Product;
+use App\Service\Stripe\Sku;
 use App\Service\Stripe\Stripe;
 use Illuminate\Contracts\Support\Responsable;
 use Storage;
 use Stripe\SKU as StripeSKU;
-use App\Product;
 use Stripe\Product as StripeProduct;
 
 class ProductsController extends Controller
 {
     /**
-     * Show the application dashboard.
-     *
+     * @var \App\Service\Stripe\Stripe
+     */
+    private $stripe;
+
+    /**
+     * @param Stripe $stripe
+     */
+    public function __construct(Stripe $stripe)
+    {
+        $this->stripe = $stripe;
+    }
+
+    /**
      * @return \Illuminate\Http\Response
      * @throws \Stripe\Error\Api
      */
     public function index()
     {
-        $stripe = new Stripe();
-
-        $product = $stripe->product('prod_DkYocfx8WCs4Ol');
-        dump($product);
-        $product->setName('Holes');
-        $product->sku()->setPrice(30000);
-        $product = $stripe->save($product);
-
-        dump($product);
-        dump($product->toArray());
-        dd('');
-
-        $product = $stripe->product('prod_DkYocfx8WCs4Ol');
-        dump($product);
-        dump($product->toArray());
-        dd('');
-
-        $products = $stripe->products();
-        dump($products);
-        dump($products->toArray());
-        dd('');
-
-        $skus = collect(StripeSKU::all([
-            'active' => true,
-        ])->data);
-
-        $stripeProducts = collect(StripeProduct::all([
-            'ids' => $skus->pluck('product')->all(),
-        ])->data);
-
-        $products = $skus->map(function (StripeSKU $sku) use ($stripeProducts) {
-            return Product::fromStripe(
-                $sku,
-                $stripeProducts->where('id', $sku->product)->first()
-            );
-        });
-
-        $products = $products->sortByDesc('stock');
+        $products = $this->stripe->products();
 
         return view('admin.products.index', ['products' => $products]);
     }
 
     /**
-     * Show the application dashboard.
+     * @param string $id
      *
+     * @return \Illuminate\Http\Response
+     * @throws \Stripe\Error\Api
+     */
+    public function show(string $id)
+    {
+        $product = $this->stripe->product($id);
+
+        return view('admin.products.show', ['product' => $product]);
+    }
+
+    /**
      * @return Responsable
      */
     public function create()
@@ -73,15 +61,11 @@ class ProductsController extends Controller
     }
 
     /**
-     * Show the application dashboard.
-     *
-     * @param string $slug
-     *
      * @return Responsable
      */
     public function store()
     {
-        $images = collect();
+        $images = new Images();
         /** @var \Illuminate\Http\UploadedFile $image */
         foreach (request()->file('images') as $key => $image) {
             $path = Storage::putFileAs(
@@ -91,39 +75,29 @@ class ProductsController extends Controller
                 'public'
             );
 
-            $images[] = asset(str_replace('public/', 'storage/', $path));
+            $images->add(asset(str_replace('public/', 'storage/', $path)));
         }
 
-        /** @var StripeProduct $product */
-        $product = StripeProduct::create([
-            'name' => request('name'),
-            'type' => 'good',
-            'caption' => request('caption'),
-            'description' => request('description'),
-            'images' => $images->toArray(),
-            'package_dimensions' => [
-                'height' => round(request('height') / 2.54, 2),
-                'width' => round(request('width') / 2.54, 2),
-                'length' => round(request('thickness') / 2.54, 2),
-                'weight' => round(request('weight') / 28.349523125, 2),
-            ],
-        ]);
+        $product = new Product(request('name'));
+        $product->setCaption(request('caption'));
+        $product->setDescription(request('description'));
+        $product->setImages($images);
+        $product->setPackageDimensions(
+            PackageDimensions::fromMetrics(
+                request('height'),
+                request('width'),
+                request('thickness'),
+                request('weight')
+            )
+        );
+        $product->setUrl(route('products.show', ['slug' => request('slug')]));
 
-        /** @var StripeSKU $sku */
-        $sku = StripeSKU::create([
-            'product' => $product->id,
-            'price' => request('price'),
-            'currency' => 'dkk',
-            'image' => $images->first(),
-            'inventory' => [
-                'type' => 'finite',
-                'quantity' => 1,
-            ],
-        ]);
-        dump($product);
-        dd($sku);
+        $sku = new Sku(request('price'), 'dkk', 1);
+        $sku->setImage($images->first());
+        $product->setSku($sku);
 
+        $product = $this->stripe->saveProduct($product);
 
-        return view('admin.products.show', ['product' => Product::fromStripe($sku, $product)]);
+        return view('admin.products.show', ['product' => $product]);
     }
 }

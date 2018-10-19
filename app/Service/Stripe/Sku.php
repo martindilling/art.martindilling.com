@@ -10,8 +10,8 @@ class Sku implements Arrayable
     /** @var string|null */
     private $id = null;
 
-    /** @var string */
-    private $productId;
+    /** @var string|null */
+    private $productId = null;
 
     /** @var bool */
     private $active = true;
@@ -32,27 +32,66 @@ class Sku implements Arrayable
     private $created = null;
 
     /**
-     * @param string $productId
      * @param int $price
      * @param string $currency
      * @param int $stock
      */
-    public function __construct(string $productId, int $price, string $currency, int $stock)
+    public function __construct(int $price, string $currency, int $stock)
     {
-        $this->productId = $productId;
         $this->price = $price;
         $this->currency = $currency;
         $this->stock = $stock;
     }
 
-    public function id() : string
+    public function id() : ?string
     {
         return $this->id;
     }
 
+    public function productId() : string
+    {
+        return $this->productId;
+    }
+
+    public function isActive() : bool
+    {
+        return $this->active;
+    }
+
+    public function price() : int
+    {
+        return $this->price;
+    }
+
+    public function currency() : string
+    {
+        return $this->currency;
+    }
+
+    public function stock() : int
+    {
+        return $this->stock;
+    }
+
+    public function image() : ?string
+    {
+        return $this->image;
+    }
+
+    public function created() : ?Carbon
+    {
+        return $this->created;
+    }
+
+
     public function setId(?string $id) : void
     {
         $this->id = $id;
+    }
+
+    public function setProductId(string $productId) : void
+    {
+        $this->productId = $productId;
     }
 
     public function setPrice(int $price) : void
@@ -93,7 +132,6 @@ class Sku implements Arrayable
     public function toArray() : array
     {
         return array_filter([
-//            'id' => $this->id,
             'product' => $this->productId,
             'active' => $this->active,
             'price' => $this->price,
@@ -103,7 +141,6 @@ class Sku implements Arrayable
                 'quantity' => $this->stock,
             ],
             'image' => $this->image,
-//            'created' => $this->created ? (int) $this->created->format('U') : null,
         ], function ($value) { return $value !== null; });
     }
 }

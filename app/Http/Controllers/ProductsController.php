@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\CheckoutFailed;
+use App\Service\Stripe\Stripe;
 use Stripe\Order;
 use Stripe\SKU;
 use App\Product;
@@ -11,39 +12,30 @@ use Stripe\Product as StripeProduct;
 class ProductsController extends Controller
 {
     /**
-     * Show the application dashboard.
-     *
+     * @var \App\Service\Stripe\Stripe
+     */
+    private $stripe;
+
+    /**
+     * @param Stripe $stripe
+     */
+    public function __construct(Stripe $stripe)
+    {
+        $this->stripe = $stripe;
+    }
+
+    /**
      * @return \Illuminate\Http\Response
      * @throws \Stripe\Error\Api
      */
     public function index()
     {
-        $skus = collect(SKU::all([
-            'active' => true,
-        ])->data);
-
-        $stripeProducts = collect(StripeProduct::all([
-            'ids' => $skus->pluck('product')->all(),
-        ])->data);
-
-        $products = $skus->map(function (SKU $sku) use ($stripeProducts) {
-            return Product::fromStripe(
-                $sku,
-                $stripeProducts->where('id', $sku->product)->first()
-            );
-        });
-
-        $products = $products->sortByDesc('stock');
-
-//        dump($skus, $stripeProducts);
-//        dd($products);
+        $products = $this->stripe->products();
 
         return view('products.index', ['products' => $products]);
     }
 
     /**
-     * Show the application dashboard.
-     *
      * @param string $slug
      *
      * @return \Illuminate\Http\Response
@@ -51,19 +43,7 @@ class ProductsController extends Controller
      */
     public function show(string $slug)
     {
-        $stripeProduct = collect(StripeProduct::all([
-            'url' => 'https://art.martindilling.com/p/' . $slug,
-        ])->data)->first();
-
-        $sku = collect(SKU::all([
-            'active' => true,
-            'product' => $stripeProduct->id,
-        ])->data)->first();
-
-        $product = Product::fromStripe($sku, $stripeProduct);
-
-//        dump($sku, $stripeProduct);
-//        dd($product);
+        $product = $this->stripe->productFromSlug($slug);
 
         return view('products.show', ['product' => $product]);
     }
@@ -78,16 +58,7 @@ class ProductsController extends Controller
      */
     public function buy(string $slug)
     {
-        /** @var StripeProduct $stripeProduct */
-        $stripeProduct = collect(StripeProduct::all([
-            'url' => 'https://art.martindilling.com/p/' . $slug,
-        ])->data)->first();
-
-        /** @var SKU $sku */
-        $sku = collect(SKU::all([
-            'active' => true,
-            'product' => $stripeProduct->id,
-        ])->data)->first();
+        $product = $this->stripe->productFromSlug($slug);
 
         $customerData = [
             'email' => request('stripeEmail'),
@@ -105,29 +76,24 @@ class ProductsController extends Controller
         ];
 
         /** @var \Stripe\Customer $customer */
-        $customer = \Stripe\Customer::all(['limit' => 1, 'email' => $customerData['email']])->data[0] ?? null;
-
-        if ($customer) {
-            $customer = \Stripe\Customer::update($customer->id, $customerData);
-        } else {
-            $customer = \Stripe\Customer::create($customerData);
-        }
+        $customer = $this->stripe->customerFromEmail($customerData['email']);
+        $customer = $this->stripe->saveCustomer($customer, $customerData);
 
         /** @var Order $order */
         $order = Order::create([
-            'currency' => $sku->currency,
+            'currency' => $product->sku()->currency(),
             'customer' => $customer->id,
             'items' => [
                 [
                     'type' => 'sku',
-                    'parent' => $sku->id,
-                    'description' => $stripeProduct->name,
+                    'parent' => $product->sku()->id(),
+                    'description' => $product->name(),
                     'quantity' => 1,
                 ],
             ],
         ]);
 
-        if ($order->amount !== $sku->price) {
+        if ($order->amount !== $product->sku()->price()) {
             throw CheckoutFailed::priceMismatchOnCharge();
         }
 

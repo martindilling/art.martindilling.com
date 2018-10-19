@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Product[]|Illuminate\Support\Collection $products
+ * @var \App\Service\Stripe\Product[]|Illuminate\Support\Collection $products
  */
 ?>
 @extends('layouts.admin')
@@ -12,19 +12,27 @@
                 <div class="container mx-auto flex flex-wrap">
                     @forelse($products as $product)
                         <div class="flex relative w-full p-4 mb-8 border shadow bg-grey-lightest">
-                            <img src="{{ $product->cover }}" class="h-48">
+                            <img src="{{ $product->cover() }}" class="h-48">
                             <div class="flex-1">
                                 <div class="px-3 pt-2 pb-3">
                                     <a
-                                        href="{{ route('admin.products.show', ['slug' => $product->slug()]) }}"
+                                        href="{{ route('admin.products.show', ['id' => $product->id()]) }}"
                                         class="block no-underline text-indigo-darker hover:text-teal-dark"
                                     >
                                         <h2 class="text-2xl">
-                                            {{ $product->name }}
+                                            {{ $product->name() }}
                                         </h2>
                                     </a>
-                                    <div class="text-sm text-grey-dark">
-                                        {{ $product->caption }}
+                                    <div class="text-base text-grey">
+                                        {{ $product->slug() }}
+                                        <br>
+                                        {{ $product->id() }}
+                                    </div>
+                                    <div class="text-base text-grey">
+                                        {{ $product->caption() }}
+                                    </div>
+                                    <div class="text-sm text-grey-dark mt-2">
+                                        {{ $product->description() }}
                                     </div>
                                     <div class="absolute pin-t pin-r mt-3 -mr-1 px-3 py-2 @if($product->isSold()) bg-red text-red-lightest @else bg-indigo text-indigo-lightest @endif shadow">
                                         @if($product->isSold())
