@@ -105,7 +105,7 @@ class Stripe
      * @param array $data
      * @return \Stripe\Customer
      */
-    public function saveCustomer(?$customer, $data) : StripeCustomer
+    public function saveCustomer(?StripeCustomer $customer, $data) : StripeCustomer
     {
         /** @var StripeCustomer $customer */
         if ($customer) {
