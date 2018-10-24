@@ -50,18 +50,70 @@ class PackageDimensions implements Arrayable
         );
     }
 
+    public function heightInInches() : float
+    {
+        return round($this->heightInInches, 2);
+    }
+
+    public function widthInInches() : float
+    {
+        return round($this->widthInInches, 2);
+    }
+
+    public function lengthInInches() : float
+    {
+        return round($this->lengthInInches, 2);
+    }
+
+    public function weightInOunces() : float
+    {
+        return round($this->weightInOunces, 2);
+    }
+
+    public function heightInCm() : float
+    {
+        return round($this->heightInInches * 2.54, 2);
+    }
+
+    public function widthInCm() : float
+    {
+        return round($this->widthInInches * 2.54, 2);
+    }
+
+    public function lengthInCm() : float
+    {
+        return round($this->lengthInInches * 2.54, 2);
+    }
+
+    public function weightInGrams() : float
+    {
+        return round($this->weightInOunces * 28.349523125, 2);
+    }
+
+    public function isEmpty() : bool
+    {
+        return !$this->heightInInches
+            || !$this->widthInInches
+            || !$this->lengthInInches
+            || !$this->weightInOunces;
+    }
+
     /**
      * Get the instance as an array.
      *
-     * @return array
+     * @return array|null
      */
-    public function inMetrics() : array
+    public function toImperialArray() : ?array
     {
+        if ($this->isEmpty()) {
+            return null;
+        }
+
         return [
-            'height' => $this->heightInInches * 2.54,
-            'width' => $this->widthInInches * 2.54,
-            'length' => $this->lengthInInches * 2.54,
-            'weight' => $this->weightInOunces * 28.349523125,
+            'height' => round($this->heightInInches, 2),
+            'width' => round($this->widthInInches, 2),
+            'length' => round($this->lengthInInches, 2),
+            'weight' => round($this->weightInOunces, 2),
         ];
     }
 

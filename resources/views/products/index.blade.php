@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Service\Stripe\Product[]|Illuminate\Support\Collection $products
+ * @var \App\Service\Product[]|Illuminate\Support\Collection $products
  */
 ?>
 @extends('layouts.app')
@@ -33,10 +33,10 @@
                                 <img src="{{ $product->cover() }}" alt="">
                                 <div class="px-3 pt-2 pb-3">
                                     <h2 class="text-2xl text-indigo-darker">
-                                        {{ $product->name() }}
+                                        {{ $product->name }}
                                     </h2>
                                     <div class="text-sm text-grey-dark">
-                                        {{ $product->caption() }}
+                                        {{ $product->caption }}
                                     </div>
                                 </div>
                             </a>

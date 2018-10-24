@@ -124,6 +124,16 @@ class Sku implements Arrayable
         $this->created = $created;
     }
 
+    public function decStock() : void
+    {
+        $this->stock--;
+    }
+
+    public function incStock() : void
+    {
+        $this->stock++;
+    }
+
     /**
      * Get the instance as an array.
      *

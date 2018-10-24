@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Service\Stripe\Product $product
+ * @var \App\Service\Product $product
  */
 ?>
 @extends('layouts.app')
@@ -31,29 +31,30 @@
                                     {{--</button>--}}
                                     <form action="{{ route('products.buy', ['slug' => $product->slug()]) }}" method="POST" class="float-right">
                                         @csrf
-                                        <script
+                                        <span data-stripe-checkout-script
                                             src="https://checkout.stripe.com/checkout.js" class="stripe-button"
                                             data-key="{{ config('services.stripe.key') }}"
-                                            data-amount="{{ $product->price() }}"
+                                            data-amount="{{ $product->price }}"
                                             data-label="Buy {{ $product->formattedPrice() }}"
                                             data-name="Art by Martin Dilling-Hansen"
-                                            data-description="Buying the piece: {{ $product->name() }}"
+                                            data-description="Buying the piece: {{ $product->name }}"
                                             data-image="{{ $product->cover() }}"
                                             data-locale="auto"
                                             data-currency="dkk"
-                                            data-shipping-address="true">
-                                        </script>
+                                            data-billing-address="true"
+                                            data-shipping-address="true"
+                                        ></span>
                                     </form>
                                 @endif
                                 <h2 class="text-2xl text-indigo-darker">
-                                    {{ $product->name() }}
+                                    {{ $product->name }}
                                 </h2>
                                 <div class="text-sm text-grey-dark">
-                                    {{ $product->caption() }}
+                                    {{ $product->caption }}
                                 </div>
                                 <hr class="border-t border-grey-light">
                                 <div class="text-sm text-grey-dark">
-                                    {{ $product->description() }}
+                                    {{ $product->description }}
                                 </div>
                             </div>
                         </div>

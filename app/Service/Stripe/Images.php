@@ -20,7 +20,7 @@ class Images implements Arrayable
         }
     }
 
-    public function first() : string
+    public function first() : ?string
     {
         return array_first($this->images);
     }

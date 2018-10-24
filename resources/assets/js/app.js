@@ -20,3 +20,18 @@ Vue.component('example-component', require('./components/ExampleComponent.vue'))
 const app = new Vue({
     el: '#app'
 });
+
+let stripeCheckoutForms = document.querySelectorAll('[data-stripe-checkout-script]');
+
+stripeCheckoutForms.forEach(function (element) {
+    let script = document.createElement('script');
+
+    let attributes = Array.prototype.slice.call(element.attributes);
+    while(attr = attributes.pop()) {
+        script.setAttribute(attr.nodeName, attr.nodeValue);
+    }
+
+    script.removeAttribute('data-stripe-checkout-script');
+
+    element.parentNode.appendChild(script);
+});

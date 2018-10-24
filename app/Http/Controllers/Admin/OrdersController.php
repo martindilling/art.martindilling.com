@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Exceptions\CheckoutFailed;
 use App\Http\Controllers\Controller;
 use App\Order;
+use App\Service\Stripe\Stripe;
 use Illuminate\Support\Collection;
 use Stripe\Charge;
 use Stripe\Order as StripeOrder;
+use Stripe\Customer as StripeCustomer;
 use Stripe\SKU;
 
 class OrdersController extends Controller
@@ -54,22 +56,28 @@ class OrdersController extends Controller
     public function markShipped(string $id)
     {
         /** @var StripeOrder $stripeOrder */
-        $stripeOrder = StripeOrder::retrieve($id);
-        $order = Order::fromStripe($stripeOrder);
+        $stripeOrder = StripeOrder::retrieve(['id' => $id, 'expand' => ['items.parent']]);
+dd($stripeOrder);
+//        $product = (new Stripe())->product($stripeOrder->);
+        $product->sku()->incStock();
+        $this->stripe->saveProduct($product);
 
-        /** @var Charge $charge */
-        $charge = Charge::create(array(
-            "amount" => $order->amount,
-            "currency" => $order->currency,
-            "customer" => $order->customer,
-//            "capture" => false,
-            "shipping" => $order->shipping->jsonSerialize(),
-            "order" => $order->id,
-            "description" => 'Payment for ' . $order->skuItems()->pluck('description')->implode(', ')
-        ));
-
-        StripeOrder::update($id, ['charge' => $charge->id]);
-        StripeOrder::update($id, ['status' => 'paid']);
+        $stripeOrder->pay(['customer' => $stripeOrder->customer]);
+//        $order = Order::fromStripe($stripeOrder);
+//
+//        /** @var Charge $charge */
+//        $charge = Charge::create(array(
+//            "amount" => $order->amount,
+//            "currency" => $order->currency,
+//            "customer" => $order->customer,
+////            "capture" => false,
+//            "shipping" => $order->shipping->jsonSerialize(),
+//            "order" => $order->id,
+//            "description" => 'Payment for ' . $order->skuItems()->pluck('description')->implode(', ')
+//        ));
+//
+//        StripeOrder::update($id, ['charge' => $charge->id]);
+//        StripeOrder::update($id, ['status' => 'paid']);
 
         return back();
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Service\Stripe\Product $product
+ * @var \App\Service\Product $product
  */
 ?>
 @extends('layouts.admin')
@@ -22,14 +22,14 @@
                                     @endif
                                 </div>
                                 <h2 class="text-2xl text-indigo-darker">
-                                    {{ $product->name() }}
+                                    {{ $product->name }}
                                 </h2>
                                 <div class="text-sm text-grey-dark">
-                                    {{ $product->caption() }}
+                                    {{ $product->caption }}
                                 </div>
                                 <hr class="border-t border-grey-light">
                                 <div class="text-sm text-grey-dark">
-                                    {{ $product->description() }}
+                                    {{ $product->description }}
                                 </div>
                             </div>
                         </div>

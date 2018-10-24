@@ -61,7 +61,7 @@ class Stripe
     public function productFromSlug(string $slug) : Product
     {
         /** @var StripeProduct $stripeProduct */
-        $stripeProduct = array_first(StripeProduct::all(['active' => true, 'url' => $slug])->data);
+        $stripeProduct = array_first(StripeProduct::all(['active' => true, 'url' => route('products.show', ['slug' => $slug])])->data);
         /** @var StripeSKU $stripeSku */
         $stripeSku = array_first(StripeSKU::all(['active' => true, 'product' => $stripeProduct ? $stripeProduct->id : ''])->data);
 
@@ -84,7 +84,7 @@ class Stripe
             /** @var StripeProduct $stripeProduct */
             $stripeProduct = StripeProduct::update($product->id(), $product->toArray());
             /** @var StripeSKU $stripeSku */
-            $stripeSku = StripeSKU::update($stripeProduct->id, $product->sku()->toArray());
+            $stripeSku = StripeSKU::update($product->sku()->id(), $product->sku()->toArray());
         }
 
         return $this->buildProductFrom($stripeProduct, $stripeSku);
@@ -92,10 +92,10 @@ class Stripe
 
     /**
      * @param string $email
-     * @return array
+     * @return StripeCustomer
      * @throws \Stripe\Error\Api
      */
-    public function customerFromEmail(string $email) : array
+    public function customerFromEmail(string $email) : ?StripeCustomer
     {
         return array_first(StripeCustomer::all(['email' => $email])->data);
     }
@@ -127,12 +127,14 @@ class Stripe
 
         $product->setImages(new Images($stripeProduct->images));
         $product->setPackageDimensions(
-            new PackageDimensions(
-                $stripeProduct->package_dimensions->height,
-                $stripeProduct->package_dimensions->width,
-                $stripeProduct->package_dimensions->length,
-                $stripeProduct->package_dimensions->weight
-            )
+            $stripeProduct->package_dimensions
+                ? new PackageDimensions(
+                    $stripeProduct->package_dimensions->height,
+                    $stripeProduct->package_dimensions->width,
+                    $stripeProduct->package_dimensions->length,
+                    $stripeProduct->package_dimensions->weight
+                )
+                : null
         );
         $product->setUrl($stripeProduct->url);
         $product->setCreated(Carbon::createFromTimestamp($stripeProduct->created));

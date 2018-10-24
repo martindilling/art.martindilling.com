@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\CheckoutFailed;
 use App\Service\Stripe\Stripe;
+use App\Service\StripeService;
 use Stripe\Order;
 use Stripe\SKU;
 use App\Product;
@@ -14,23 +15,30 @@ class ProductsController extends Controller
     /**
      * @var \App\Service\Stripe\Stripe
      */
+    private $s;
+
+    /**
+     * @var \App\Service\StripeService
+     */
     private $stripe;
 
     /**
-     * @param Stripe $stripe
+     * @param Stripe $s
+     * @param \App\Service\StripeService $stripe
      */
-    public function __construct(Stripe $stripe)
+    public function __construct(Stripe $s, StripeService $stripe)
     {
+        $this->s = $s;
         $this->stripe = $stripe;
     }
 
     /**
-     * @return \Illuminate\Http\Response
-     * @throws \Stripe\Error\Api
+     * @return \Illuminate\Contracts\Support\Renderable
+     * @throws \Stripe\Error\Base
      */
     public function index()
     {
-        $products = $this->stripe->products();
+        $products = $this->stripe->allProducts();
 
         return view('products.index', ['products' => $products]);
     }
@@ -38,12 +46,12 @@ class ProductsController extends Controller
     /**
      * @param string $slug
      *
-     * @return \Illuminate\Http\Response
-     * @throws \Stripe\Error\Api
+     * @return \Illuminate\Contracts\Support\Renderable
+     * @throws \Stripe\Error\Base
      */
     public function show(string $slug)
     {
-        $product = $this->stripe->productFromSlug($slug);
+        $product = $this->stripe->findProductBySlug($slug);
 
         return view('products.show', ['product' => $product]);
     }
@@ -54,11 +62,11 @@ class ProductsController extends Controller
      * @param string $slug
      *
      * @return \Illuminate\Http\Response
-     * @throws \Stripe\Error\Api
+     * @throws \Stripe\Error\Base
      */
     public function buy(string $slug)
     {
-        $product = $this->stripe->productFromSlug($slug);
+        $product = $this->stripe->findProductBySlug($slug);
 
         $customerData = [
             'email' => request('stripeEmail'),
@@ -75,48 +83,15 @@ class ProductsController extends Controller
             ],
         ];
 
-        /** @var \Stripe\Customer $customer */
-        $customer = $this->stripe->customerFromEmail($customerData['email']);
+        $customer = $this->stripe->findCustomerByEmail($customerData['email']);
         $customer = $this->stripe->saveCustomer($customer, $customerData);
+        $orderId = $this->stripe->createOrder($product, $customer);
+        $order = $this->stripe->findOrder($orderId);
 
-        /** @var Order $order */
-        $order = Order::create([
-            'currency' => $product->sku()->currency(),
-            'customer' => $customer->id,
-            'items' => [
-                [
-                    'type' => 'sku',
-                    'parent' => $product->sku()->id(),
-                    'description' => $product->name(),
-                    'quantity' => 1,
-                ],
-            ],
-        ]);
+        // TODO: Send confirmation email
 
-        if ($order->amount !== $product->sku()->price()) {
-            throw CheckoutFailed::priceMismatchOnCharge();
-        }
-
-//        $order->pay(['customer' => $customer->id]);
-
-//        "stripeShippingName" => "Martin Dilling-Hansen"
-//      "stripeShippingAddressCountry" => "Denmark"
-//      "stripeShippingAddressCountryCode" => "DK"
-//      "stripeShippingAddressZip" => "2640"
-//      "stripeShippingAddressLine1" => "Liselundager 8D"
-//      "stripeShippingAddressCity" => "Hedehusene"
-//      "stripeShippingAddressState" => "85"
-
-        dd($order);
-//        dd(request());
-
-
-
-        $product = Product::fromStripe($sku, $stripeProduct);
-
-//        dump($sku, $stripeProduct);
-//        dd($product);
-
-        return view('products.show', ['product' => $product]);
+        return view('products.confirmation', ['order' => $order]);
     }
+
+
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \App\Service\Stripe\Product[]|Illuminate\Support\Collection $products
+ * @var \App\Service\Product[]|Illuminate\Support\Collection $products
  */
 ?>
 @extends('layouts.admin')
@@ -16,23 +16,23 @@
                             <div class="flex-1">
                                 <div class="px-3 pt-2 pb-3">
                                     <a
-                                        href="{{ route('admin.products.show', ['id' => $product->id()]) }}"
+                                        href="{{ route('admin.products.show', ['id' => $product->id]) }}"
                                         class="block no-underline text-indigo-darker hover:text-teal-dark"
                                     >
                                         <h2 class="text-2xl">
-                                            {{ $product->name() }}
+                                            {{ $product->name }}
                                         </h2>
                                     </a>
                                     <div class="text-base text-grey">
                                         {{ $product->slug() }}
                                         <br>
-                                        {{ $product->id() }}
+                                        {{ $product->id }}
                                     </div>
                                     <div class="text-base text-grey">
-                                        {{ $product->caption() }}
+                                        {{ $product->caption }}
                                     </div>
                                     <div class="text-sm text-grey-dark mt-2">
-                                        {{ $product->description() }}
+                                        {{ $product->description }}
                                     </div>
                                     <div class="absolute pin-t pin-r mt-3 -mr-1 px-3 py-2 @if($product->isSold()) bg-red text-red-lightest @else bg-indigo text-indigo-lightest @endif shadow">
                                         @if($product->isSold())

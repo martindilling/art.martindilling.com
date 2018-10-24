@@ -31,6 +31,7 @@
             "App\\": "app/"
         },
         "files": [
+            "helpers/helpers.php",
             "helpers.php"
         ]
     },
